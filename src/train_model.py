@@ -3,6 +3,7 @@ import mlflow
 import mlflow.sklearn
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from imblearn.over_sampling import SMOTE
 import joblib
 
 def train_model():
@@ -14,14 +15,19 @@ def train_model():
     X_test = pd.read_csv("data/processed/X_test.csv")
     y_test = pd.read_csv("data/processed/y_test.csv")
 
+    # Apply SMOTE only on training data
+    smote = SMOTE(random_state=42)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+
     # Set MLflow experiment
     mlflow.set_experiment("loan-default-model")
 
     with mlflow.start_run():
 
-        model = RandomForestClassifier(n_estimators=100)
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
 
-        model.fit(X_train, y_train.values.ravel())
+        # Train model on resampled data
+        model.fit(X_train_resampled, y_train_resampled.values.ravel())
 
         predictions = model.predict(X_test)
 
