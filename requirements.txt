@@ -7,3 +7,4 @@ joblib
 fastapi
 uvicorn
 requests
+mlflow
