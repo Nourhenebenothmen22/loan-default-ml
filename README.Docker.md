@@ -1,22 +1,48 @@
-### Building and running your application
+# Documentation Docker - Loan Default Prediction
 
-When you're ready, start your application by running:
-`docker compose up --build`.
+Ce projet utilise Docker pour simplifier le déploiement de l'API de prédiction et le suivi des expériences avec MLflow.
 
-Your application will be available at http://localhost:8000.
+## Lancement de l'application
 
-### Deploying your application to the cloud
+Pour démarrer tous les services, exécutez la commande suivante à la racine du projet :
 
-First, build your image, e.g.: `docker build -t myapp .`.
-If your cloud uses a different CPU architecture than your development
-machine (e.g., you are on a Mac M1 and your cloud provider is amd64),
-you'll want to build the image for that platform, e.g.:
-`docker build --platform=linux/amd64 -t myapp .`.
+```bash
+docker compose up --build
+```
 
-Then, push it to your registry, e.g. `docker push myregistry.com/myapp`
+## Services disponibles
 
-Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharing/)
-docs for more detail on building and pushing.
+Une fois les conteneurs lancés, les services suivants sont accessibles :
 
-### References
-* [Docker's Python guide](https://docs.docker.com/language/python/)
+- **API de prédiction (FastAPI)** : [http://localhost:8000](http://localhost:8000)
+- **Interface MLflow (Tracking Server)** : [http://localhost:5000](http://localhost:5000)
+
+## Utilisation de l'API
+
+### Vérification de l'état
+
+```bash
+curl http://localhost:8000/
+```
+
+### Faire une prédiction
+
+Envoyez une requête POST à l'url `/predict` avec les caractéristiques nécessaires :
+
+```bash
+curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d '{"data": [0.5, 1.0, 2.3, ...]}'
+```
+
+## Structure Docker
+
+- **Dockerfile** : Utilise une base Python 3.11-slim, installe les dépendances nécessaires et lance l'API avec Uvicorn.
+- **compose.yaml** : Orchestre deux services :
+  1. `api` : L'application FastAPI.
+  2. `mlflow` : Serveur de suivi pour enregistrer les paramètres et métriques des modèles.
+
+## Persistence
+
+Les volumes Docker sont configurés pour que les éléments suivants soient persistés même après l'arrêt des conteneurs :
+
+- Le répertoire `models/` (contenant les fichiers `.pkl`).
+- Le répertoire `mlruns/` et le fichier `mlflow.db` pour le suivi MLflow.
